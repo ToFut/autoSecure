@@ -276,20 +276,20 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
     ];
   };
 
-  // Generate Israeli Police-style Operation Order (פקודת מבצע)
+  // Generate Israeli Police-style Operation Order (Operation Order)
   const generateIsraeliPoliceOperationOrder = () => {
     if (!currentPlan) return null;
 
     const operationOrder = {
       header: {
-        title: 'פקודת מבצע - פקודת אבטחה',
-        operationName: currentPlan.name || 'מבצע אבטחה',
+        title: 'OPERATION ORDER - SECURITY OPERATION',
+        operationName: currentPlan.name || 'Security Operation',
         operationNumber: `OP-${Date.now()}`,
-        date: new Date().toLocaleDateString('he-IL'),
-        time: new Date().toLocaleTimeString('he-IL'),
-        classification: 'סודי',
-        unit: 'יחידת האבטחה',
-        commander: 'מפקד המבצע'
+        date: new Date().toLocaleDateString('en-US'),
+        time: new Date().toLocaleTimeString('en-US'),
+        classification: 'CONFIDENTIAL',
+        unit: 'Security Unit',
+        commander: 'Operation Commander'
       },
       situation: {
         enemy: {
@@ -297,13 +297,13 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
             type: risk.category,
             description: risk.description,
             location: `${risk.location.lat.toFixed(6)}, ${risk.location.lng.toFixed(6)}`,
-            probability: 'גבוה'
+            probability: 'HIGH'
           })),
           capabilities: [
-            'יכולת חדירה למוקד',
-            'שימוש בנשק קל',
-            'פעילות חבלנית',
-            'התקפות רשת'
+            'Facility penetration capability',
+            'Light weapons usage',
+            'Sabotage activities',
+            'Cyber attacks'
           ]
         },
         friendly: {
@@ -327,57 +327,57 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
         }
       },
       mission: {
-        primary: 'אבטחת המוקד ומניעת חדירת גורמים עוינים',
-        secondary: 'הגנה על חיי אדם ורכוש',
+        primary: 'Secure the facility and prevent hostile infiltration',
+        secondary: 'Protect human life and property',
         constraints: [
-          'שמירה על זכויות אזרח',
-          'איסור שימוש בכוח מופרז',
-          'ציות לחוקי המדינה'
+          'Respect civil rights',
+          'Prohibit excessive force',
+          'Comply with state laws'
         ]
       },
       execution: {
         concept: {
-          phase1: 'הקמת מערך האבטחה והכנת המוקד',
-          phase2: 'הפעלת מערכות האבטחה והתחלת סיורים',
-          phase3: 'ניהול אירועים ותגובה לאיומים',
-          phase4: 'סיום המבצע ופינוי הכוחות'
+          phase1: 'Establish security perimeter and prepare facility',
+          phase2: 'Activate security systems and begin patrols',
+          phase3: 'Manage incidents and respond to threats',
+          phase4: 'Conclude operation and withdraw forces'
         },
         tasks: {
           alpha: {
-            commander: 'מפקד צוות אלפא',
-            mission: 'אבטחת הכניסה הראשית',
-            resources: '4 שוטרים, 2 כלבי שמירה',
-            location: 'שער ראשי'
+            commander: 'Alpha Team Commander',
+            mission: 'Secure main entrance',
+            resources: '4 officers, 2 K9 units',
+            location: 'Main gate'
           },
           bravo: {
-            commander: 'מפקד צוות בראבו',
-            mission: 'סיור היקפי ופיקוח על הגדר',
-            resources: '6 שוטרים, 1 כלב שמירה',
-            location: 'היקף המוקד'
+            commander: 'Bravo Team Commander',
+            mission: 'Perimeter patrol and fence monitoring',
+            resources: '6 officers, 1 K9 unit',
+            location: 'Facility perimeter'
           },
           charlie: {
-            commander: 'מפקד צוות צארלי',
-            mission: 'אבטחת פנים המוקד',
-            resources: '8 שוטרים, 2 כלבי שמירה',
-            location: 'אזורים פנימיים'
+            commander: 'Charlie Team Commander',
+            mission: 'Internal facility security',
+            resources: '8 officers, 2 K9 units',
+            location: 'Internal areas'
           },
           delta: {
-            commander: 'מפקד צוות דלתא',
-            mission: 'תגובה מהירה וטיפול באירועים',
-            resources: '4 שוטרים, 1 צוות רפואי',
-            location: 'מרכז התגובה'
+            commander: 'Delta Team Commander',
+            mission: 'Rapid response and incident management',
+            resources: '4 officers, 1 medical team',
+            location: 'Response center'
           }
         },
         coordination: {
           signals: {
-            primary: 'ערוץ רדיו 1 - תקשורת ראשית',
-            secondary: 'ערוץ רדיו 2 - תקשורת משנית',
-            emergency: 'ערוץ רדיו 3 - מצבי חירום',
+            primary: 'Radio Channel 1 - Primary Communications',
+            secondary: 'Radio Channel 2 - Secondary Communications',
+            emergency: 'Radio Channel 3 - Emergency Situations',
             codes: {
-              'קוד אדום': 'אירוע אבטחה חמור',
-              'קוד צהוב': 'חשד לפעילות חשודה',
-              'קוד כחול': 'אירוע רפואי',
-              'קוד שחור': 'אירוע חבלני'
+              'Code Red': 'Critical security incident',
+              'Code Yellow': 'Suspicious activity detected',
+              'Code Blue': 'Medical emergency',
+              'Code Black': 'Sabotage incident'
             }
           },
           timing: {
@@ -391,39 +391,39 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
       service: {
         logistics: {
           supplies: [
-            'ציוד אבטחה אישי',
-            'מכשירי קשר',
-            'תחמושת',
-            'ציוד רפואי',
-            'מזון ומים'
+            'Personal security equipment',
+            'Communication devices',
+            'Ammunition',
+            'Medical supplies',
+            'Food and water'
           ],
           transportation: [
-            'רכבי סיור',
-            'רכב פיקוד',
-            'רכב רפואי',
-            'רכב תגובה מהירה'
+            'Patrol vehicles',
+            'Command vehicle',
+            'Medical vehicle',
+            'Rapid response vehicle'
           ]
         },
         medical: {
           teams: currentPlan.resources.filter(r => r.type === 'medical').reduce((sum, r) => sum + r.count, 0),
-          location: 'מרכז רפואי במוקד',
-          evacuation: 'בית חולים קרוב - 10 דקות'
+          location: 'Medical center at facility',
+          evacuation: 'Nearest hospital - 10 minutes'
         }
       },
       command: {
         chain: {
-          commander: 'מפקד המבצע',
-          deputy: 'סגן מפקד המבצע',
-          alpha: 'מפקד צוות אלפא',
-          bravo: 'מפקד צוות בראבו',
-          charlie: 'מפקד צוות צארלי',
-          delta: 'מפקד צוות דלתא'
+          commander: 'Operation Commander',
+          deputy: 'Deputy Operation Commander',
+          alpha: 'Alpha Team Commander',
+          bravo: 'Bravo Team Commander',
+          charlie: 'Charlie Team Commander',
+          delta: 'Delta Team Commander'
         },
-        location: 'מרכז הפיקוד - בניין ראשי',
+        location: 'Command Center - Main Building',
         communications: {
-          primary: '+972-XX-XXX-XXXX',
-          secondary: '+972-XX-XXX-XXXX',
-          emergency: '100'
+          primary: '+1-555-0100',
+          secondary: '+1-555-0101',
+          emergency: '911'
         }
       }
     };
@@ -628,14 +628,14 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
       // Add Hebrew font support (basic implementation)
       pdf.setFont('helvetica');
 
-      // Header with Hebrew title
+      // Header with English title
       pdf.setFontSize(20);
       pdf.setTextColor(0, 0, 0);
-      pdf.text('פקודת מבצע - פקודת אבטחה', pageWidth/2, yPosition, { align: 'center' });
+      pdf.text('OPERATION ORDER - SECURITY OPERATION', pageWidth/2, yPosition, { align: 'center' });
       
       yPosition += 10;
       pdf.setFontSize(14);
-      pdf.text(`Operation Order - Security Operation`, pageWidth/2, yPosition, { align: 'center' });
+      pdf.text(`Israeli Police-Style Security Operation`, pageWidth/2, yPosition, { align: 'center' });
       
       yPosition += 15;
       pdf.setFontSize(12);
@@ -650,11 +650,11 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
       yPosition += 15;
       pdf.setFontSize(16);
       pdf.setTextColor(0, 0, 0);
-      pdf.text('1. SITUATION (מצב)', 20, yPosition);
+      pdf.text('1. SITUATION', 20, yPosition);
       
       yPosition += 10;
       pdf.setFontSize(12);
-      pdf.text('1.1 Enemy Forces (כוחות האויב):', 25, yPosition);
+      pdf.text('1.1 Enemy Forces:', 25, yPosition);
       
       yPosition += 8;
       pdf.setFontSize(10);
@@ -670,7 +670,7 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
       // Mission Section
       yPosition += 10;
       pdf.setFontSize(16);
-      pdf.text('2. MISSION (משימה)', 20, yPosition);
+      pdf.text('2. MISSION', 20, yPosition);
       
       yPosition += 10;
       pdf.setFontSize(12);
@@ -682,7 +682,7 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
       // Execution Section
       yPosition += 15;
       pdf.setFontSize(16);
-      pdf.text('3. EXECUTION (ביצוע)', 20, yPosition);
+      pdf.text('3. EXECUTION', 20, yPosition);
       
       yPosition += 10;
       pdf.setFontSize(12);
@@ -726,7 +726,7 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
       // Command Section
       yPosition += 10;
       pdf.setFontSize(16);
-      pdf.text('4. COMMAND (פיקוד)', 20, yPosition);
+      pdf.text('4. COMMAND', 20, yPosition);
       
       yPosition += 10;
       pdf.setFontSize(12);
