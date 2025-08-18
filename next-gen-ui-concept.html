@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoSecure Next-Gen - Professional Security Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        /* Glassmorphism with subtle blur */
+        .glass {
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Smart panels that adapt to content */
+        .smart-panel {
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.9) 0%, rgba(20, 20, 20, 0.8) 100%);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .smart-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.5), transparent);
+            animation: scan 3s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Holographic effect for critical elements */
+        .holographic {
+            background: linear-gradient(45deg, #00ff88, #00d4ff, #ff00ff, #00ff88);
+            background-size: 400% 400%;
+            animation: holograph 5s ease infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        @keyframes holograph {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* Neural network visualization */
+        .neural-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.03;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 255, 0.3) 0%, transparent 50%);
+            animation: neuralPulse 10s ease-in-out infinite;
+        }
+        
+        @keyframes neuralPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.03; }
+            50% { transform: scale(1.1) rotate(5deg); opacity: 0.05; }
+        }
+        
+        /* Smart buttons with haptic feedback simulation */
+        .smart-btn {
+            position: relative;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        
+        .smart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+            border-color: rgba(0, 255, 136, 0.6);
+        }
+        
+        .smart-btn:active {
+            transform: translateY(0);
+        }
+        
+        .smart-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .smart-btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* Priority-based color system */
+        .priority-critical { 
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+            border-left: 3px solid #ef4444;
+            animation: criticalPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes criticalPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            50% { box-shadow: 0 0 20px 5px rgba(239, 68, 68, 0.3); }
+        }
+        
+        .priority-high { 
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.2), rgba(251, 146, 60, 0.1));
+            border-left: 3px solid #fb923c;
+        }
+        
+        .priority-medium { 
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(250, 204, 21, 0.1));
+            border-left: 3px solid #facc15;
+        }
+        
+        .priority-low { 
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+            border-left: 3px solid #22c55e;
+        }
+        
+        /* Adaptive grid system */
+        .adaptive-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+        
+        /* Voice command indicator */
+        .voice-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .voice-indicator.active {
+            animation: voicePulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes voicePulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 0 20px rgba(0, 255, 136, 0);
+                transform: scale(1.05);
+            }
+        }
+        
+        /* Smart tooltip */
+        .smart-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+        }
+        
+        .smart-tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Augmented Reality overlay simulation */
+        .ar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 136, 0.03) 2px,
+                    rgba(0, 255, 136, 0.03) 4px
+                );
+            animation: arScan 5s linear infinite;
+        }
+        
+        @keyframes arScan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(20px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="neural-bg"></div>
+    
+    <!-- Main Command Center -->
+    <div class="h-screen flex flex-col">
+        <!-- Intelligent Header Bar -->
+        <header class="smart-panel h-16 flex items-center justify-between px-6 z-50">
+            <div class="flex items-center gap-6">
+                <!-- Logo with Status -->
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-400 to-cyan-400 flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-black text-lg"></i>
+                        </div>
+                        <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold holographic">AutoSecure Pro</h1>
+                        <p class="text-xs text-gray-500">Command Center Active</p>
+                    </div>
+                </div>
+                
+                <!-- Smart Mode Switcher -->
+                <div class="flex items-center gap-2 bg-black/50 rounded-lg p-1">
+                    <button class="px-3 py-1.5 rounded text-xs font-medium bg-gradient-to-r from-green-400 to-cyan-400 text-black">
+                        <i class="fas fa-brain mr-1"></i> AI Assist
+                    </button>
+                    <button class="px-3 py-1.5 rounded text-xs font-medium text-gray-400 hover:text-white transition-colors">
+                        Manual
+                    </button>
+                    <button class="px-3 py-1.5 rounded text-xs font-medium text-gray-400 hover:text-white transition-colors">
+                        Training
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Intelligent Status Bar -->
+            <div class="flex items-center gap-4">
+                <!-- Voice Command -->
+                <div class="voice-indicator active">
+                    <i class="fas fa-microphone text-black text-sm"></i>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="flex items-center gap-3 text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                        <span class="text-gray-400">Systems</span>
+                        <span class="text-green-400 font-bold">100%</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                        <span class="text-gray-400">Threats</span>
+                        <span class="text-yellow-400 font-bold">3</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <span class="text-gray-400">Units</span>
+                        <span class="text-blue-400 font-bold">24/24</span>
+                    </div>
+                </div>
+                
+                <!-- Time & Weather -->
+                <div class="text-right">
+                    <div class="text-sm font-medium">14:32:18</div>
+                    <div class="text-xs text-gray-500">Clear • 22°C • Wind 5km/h</div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Smart Sidebar - Context Aware -->
+            <aside class="w-80 smart-panel flex flex-col">
+                <!-- Workflow Progress -->
+                <div class="p-4 border-b border-gray-800">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-semibold">Mission Planning</h3>
+                        <span class="text-xs bg-green-400/20 text-green-400 px-2 py-1 rounded-full">Auto</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
+                                <i class="fas fa-check text-black text-xs"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs font-medium">Venue Analysis</p>
+                                <div class="w-full bg-gray-800 rounded-full h-1 mt-1">
+                                    <div class="bg-green-400 h-1 rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center animate-pulse">
+                                <span class="text-black text-xs font-bold">2</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs font-medium">Threat Assessment</p>
+                                <div class="w-full bg-gray-800 rounded-full h-1 mt-1">
+                                    <div class="bg-blue-400 h-1 rounded-full transition-all duration-500" style="width: 65%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 opacity-50">
+                            <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
+                                <span class="text-gray-400 text-xs font-bold">3</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs font-medium">Resource Deployment</p>
+                                <div class="w-full bg-gray-800 rounded-full h-1 mt-1">
+                                    <div class="bg-gray-600 h-1 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI Recommendations -->
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-semibold">AI Insights</h3>
+                            <button class="text-xs text-gray-400 hover:text-white">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Priority Alerts -->
+                        <div class="space-y-2">
+                            <div class="priority-critical rounded-lg p-3">
+                                <div class="flex items-start gap-2">
+                                    <i class="fas fa-exclamation-triangle text-red-400 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-xs font-medium">Vehicle Access Unprotected</p>
+                                        <p class="text-xs text-gray-400 mt-1">North entrance needs barriers</p>
+                                        <button class="text-xs text-red-400 mt-2 hover:text-red-300">Deploy Solution →</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="priority-high rounded-lg p-3">
+                                <div class="flex items-start gap-2">
+                                    <i class="fas fa-users text-orange-400 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-xs font-medium">Crowd Density Warning</p>
+                                        <p class="text-xs text-gray-400 mt-1">Expected 5,000+ attendees</p>
+                                        <button class="text-xs text-orange-400 mt-2 hover:text-orange-300">View Analysis →</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="priority-medium rounded-lg p-3">
+                                <div class="flex items-start gap-2">
+                                    <i class="fas fa-cloud-sun text-yellow-400 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-xs font-medium">Weather Advisory</p>
+                                        <p class="text-xs text-gray-400 mt-1">Rain expected at 18:00</p>
+                                        <button class="text-xs text-yellow-400 mt-2 hover:text-yellow-300">Adjust Plan →</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Smart Actions -->
+                    <div>
+                        <h3 class="text-sm font-semibold mb-3">Quick Actions</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="smart-btn text-xs">
+                                <i class="fas fa-magic mr-1"></i> Auto-Deploy
+                            </button>
+                            <button class="smart-btn text-xs">
+                                <i class="fas fa-robot mr-1"></i> Simulate
+                            </button>
+                            <button class="smart-btn text-xs">
+                                <i class="fas fa-file-export mr-1"></i> Brief Team
+                            </button>
+                            <button class="smart-btn text-xs">
+                                <i class="fas fa-headset mr-1"></i> Comms Test
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Main Map Area with AR Overlay -->
+            <main class="flex-1 relative bg-gray-950">
+                <div class="ar-overlay"></div>
+                
+                <!-- Floating Command Palette -->
+                <div class="absolute top-4 left-4 smart-panel rounded-xl p-4 w-96 z-40">
+                    <div class="flex items-center gap-3 mb-3">
+                        <input 
+                            type="text" 
+                            placeholder="Ask AI or type command..." 
+                            class="flex-1 bg-black/50 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-green-400 focus:outline-none"
+                        />
+                        <button class="w-10 h-10 bg-gradient-to-r from-green-400 to-cyan-400 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-paper-plane text-black text-sm"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Live Metrics Grid -->
+                    <div class="adaptive-grid">
+                        <div class="bg-black/50 rounded-lg p-2 border border-gray-800">
+                            <div class="text-xs text-gray-400">Response</div>
+                            <div class="text-lg font-bold text-green-400">28s</div>
+                        </div>
+                        <div class="bg-black/50 rounded-lg p-2 border border-gray-800">
+                            <div class="text-xs text-gray-400">Coverage</div>
+                            <div class="text-lg font-bold text-blue-400">94%</div>
+                        </div>
+                        <div class="bg-black/50 rounded-lg p-2 border border-gray-800">
+                            <div class="text-xs text-gray-400">Risk</div>
+                            <div class="text-lg font-bold text-yellow-400">3.2</div>
+                        </div>
+                        <div class="bg-black/50 rounded-lg p-2 border border-gray-800">
+                            <div class="text-xs text-gray-400">Cost</div>
+                            <div class="text-lg font-bold text-white">$42k</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Map Placeholder with Smart Overlays -->
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="w-48 h-48 mx-auto mb-6 relative">
+                            <div class="absolute inset-0 bg-gradient-to-br from-green-400/20 to-cyan-400/20 rounded-full animate-pulse"></div>
+                            <div class="absolute inset-4 bg-gradient-to-br from-green-400/30 to-cyan-400/30 rounded-full animate-pulse animation-delay-200"></div>
+                            <div class="absolute inset-8 bg-gradient-to-br from-green-400/40 to-cyan-400/40 rounded-full animate-pulse animation-delay-400"></div>
+                            <div class="relative w-full h-full flex items-center justify-center">
+                                <i class="fas fa-map-marked-alt text-6xl text-cyan-400"></i>
+                            </div>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-2 holographic">Intelligent Security Map</h2>
+                        <p class="text-gray-400">AI-Enhanced Tactical View</p>
+                        <div class="mt-4 flex items-center justify-center gap-2">
+                            <span class="px-3 py-1 bg-green-400/20 text-green-400 rounded-full text-xs">
+                                <i class="fas fa-circle text-xs mr-1"></i> 12 Units Active
+                            </span>
+                            <span class="px-3 py-1 bg-blue-400/20 text-blue-400 rounded-full text-xs">
+                                <i class="fas fa-video text-xs mr-1"></i> 8 Cameras Online
+                            </span>
+                            <span class="px-3 py-1 bg-yellow-400/20 text-yellow-400 rounded-full text-xs">
+                                <i class="fas fa-drone text-xs mr-1"></i> 2 Drones Ready
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Smart Tool Palette -->
+                <div class="absolute bottom-4 left-4 right-4 smart-panel rounded-xl p-4 z-40">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <!-- Tool Categories -->
+                            <div class="flex items-center gap-2">
+                                <button class="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-400 to-blue-500 flex items-center justify-center group hover:scale-110 transition-transform">
+                                    <i class="fas fa-ruler-combined text-black"></i>
+                                </button>
+                                <button class="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center group hover:scale-110 transition-transform">
+                                    <i class="fas fa-draw-polygon text-gray-400 group-hover:text-white"></i>
+                                </button>
+                                <button class="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center group hover:scale-110 transition-transform">
+                                    <i class="fas fa-route text-gray-400 group-hover:text-white"></i>
+                                </button>
+                                <button class="w-10 h-10 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center group hover:scale-110 transition-transform">
+                                    <i class="fas fa-layer-group text-gray-400 group-hover:text-white"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="h-8 w-px bg-gray-700"></div>
+                            
+                            <!-- Resource Palette -->
+                            <div class="flex items-center gap-2">
+                                <div class="text-xs text-gray-400 mr-2">Deploy:</div>
+                                <button class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs flex items-center gap-1 transition-all hover:scale-105">
+                                    <i class="fas fa-user-shield text-green-400"></i>
+                                    <span>Guard</span>
+                                </button>
+                                <button class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs flex items-center gap-1 transition-all hover:scale-105">
+                                    <i class="fas fa-video text-blue-400"></i>
+                                    <span>Camera</span>
+                                </button>
+                                <button class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs flex items-center gap-1 transition-all hover:scale-105">
+                                    <i class="fas fa-broadcast-tower text-purple-400"></i>
+                                    <span>Sensor</span>
+                                </button>
+                                <button class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs flex items-center gap-1 transition-all hover:scale-105">
+                                    <i class="fas fa-dog text-yellow-400"></i>
+                                    <span>K9</span>
+                                </button>
+                                <button class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs flex items-center gap-1 transition-all hover:scale-105">
+                                    <i class="fas fa-helicopter text-cyan-400"></i>
+                                    <span>Aerial</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- View Controls -->
+                        <div class="flex items-center gap-2">
+                            <button class="text-xs text-gray-400 hover:text-white">
+                                <i class="fas fa-layer-group mr-1"></i> Layers
+                            </button>
+                            <button class="text-xs text-gray-400 hover:text-white">
+                                <i class="fas fa-th mr-1"></i> Grid
+                            </button>
+                            <button class="text-xs text-gray-400 hover:text-white">
+                                <i class="fas fa-vr-cardboard mr-1"></i> 3D
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            
+            <!-- Smart Right Panel - Adaptive Content -->
+            <aside class="w-96 smart-panel flex flex-col">
+                <!-- Tabbed Interface -->
+                <div class="flex border-b border-gray-800">
+                    <button class="flex-1 px-4 py-3 text-sm font-medium text-green-400 border-b-2 border-green-400">
+                        <i class="fas fa-brain mr-2"></i>AI Analysis
+                    </button>
+                    <button class="flex-1 px-4 py-3 text-sm font-medium text-gray-400 hover:text-white">
+                        <i class="fas fa-users mr-2"></i>Resources
+                    </button>
+                    <button class="flex-1 px-4 py-3 text-sm font-medium text-gray-400 hover:text-white">
+                        <i class="fas fa-clock mr-2"></i>Timeline
+                    </button>
+                </div>
+                
+                <!-- AI Analysis Content -->
+                <div class="flex-1 overflow-y-auto p-4">
+                    <!-- Predictive Analytics -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold mb-3">Predictive Analysis</h3>
+                        <div class="bg-gradient-to-r from-green-400/10 to-cyan-400/10 rounded-xl p-4 border border-green-400/20">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs text-gray-400">AI Confidence</span>
+                                <span class="text-lg font-bold text-green-400">92%</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-gray-400">Crowd Peak Time</span>
+                                    <span class="text-white font-medium">19:30 - 20:15</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-gray-400">Incident Probability</span>
+                                    <span class="text-yellow-400 font-medium">Low-Medium</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-gray-400">Recommended Backup</span>
+                                    <span class="text-white font-medium">+4 Units</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Suggested Deployment Plans -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold mb-3">Deployment Options</h3>
+                        <div class="space-y-2">
+                            <div class="bg-black/30 rounded-lg p-3 border border-gray-800 hover:border-green-400/50 cursor-pointer transition-all">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium">Alpha Configuration</span>
+                                    <span class="text-xs bg-green-400/20 text-green-400 px-2 py-1 rounded">Optimal</span>
+                                </div>
+                                <div class="grid grid-cols-4 gap-2 text-xs">
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-white">12</div>
+                                        <div class="text-gray-500">Guards</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-white">8</div>
+                                        <div class="text-gray-500">Cameras</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-white">2</div>
+                                        <div class="text-gray-500">K9</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-white">1</div>
+                                        <div class="text-gray-500">Drone</div>
+                                    </div>
+                                </div>
+                                <button class="w-full mt-3 smart-btn text-xs">
+                                    <i class="fas fa-check mr-1"></i> Apply Configuration
+                                </button>
+                            </div>
+                            
+                            <div class="bg-black/30 rounded-lg p-3 border border-gray-800 hover:border-blue-400/50 cursor-pointer transition-all">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium">Beta Configuration</span>
+                                    <span class="text-xs bg-blue-400/20 text-blue-400 px-2 py-1 rounded">Balanced</span>
+                                </div>
+                                <div class="grid grid-cols-4 gap-2 text-xs">
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-white">8</div>
+                                        <div class="text-gray-500">Guards</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-white">6</div>
+                                        <div class="text-gray-500">Cameras</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-white">1</div>
+                                        <div class="text-gray-500">K9</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-white">0</div>
+                                        <div class="text-gray-500">Drone</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Real-time Adjustments -->
+                    <div>
+                        <h3 class="text-sm font-semibold mb-3">Live Adjustments</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-400">Threat Sensitivity</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="range" class="w-24" value="70" />
+                                    <span class="text-xs text-white font-medium">70%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-400">Response Speed</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="range" class="w-24" value="85" />
+                                    <span class="text-xs text-white font-medium">85%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-400">Coverage Density</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="range" class="w-24" value="60" />
+                                    <span class="text-xs text-white font-medium">60%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+        
+        <!-- Intelligent Footer Bar -->
+        <footer class="smart-panel h-12 flex items-center justify-between px-6 z-50">
+            <div class="flex items-center gap-4">
+                <!-- Mode Indicators -->
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="px-2 py-1 bg-green-400/20 text-green-400 rounded">
+                        <i class="fas fa-shield-alt mr-1"></i> Protected
+                    </span>
+                    <span class="px-2 py-1 bg-blue-400/20 text-blue-400 rounded">
+                        <i class="fas fa-wifi mr-1"></i> Connected
+                    </span>
+                    <span class="px-2 py-1 bg-purple-400/20 text-purple-400 rounded">
+                        <i class="fas fa-brain mr-1"></i> AI Active
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Quick Command Bar -->
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-400 mr-2">Quick Commands:</span>
+                <button class="px-3 py-1 text-xs bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> Emergency
+                </button>
+                <button class="px-3 py-1 text-xs bg-yellow-500/20 text-yellow-400 rounded hover:bg-yellow-500/30 transition-colors">
+                    <i class="fas fa-lock mr-1"></i> Lockdown
+                </button>
+                <button class="px-3 py-1 text-xs bg-green-500/20 text-green-400 rounded hover:bg-green-500/30 transition-colors">
+                    <i class="fas fa-check-circle mr-1"></i> All Clear
+                </button>
+                <button class="px-3 py-1 text-xs bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 transition-colors">
+                    <i class="fas fa-bullhorn mr-1"></i> Broadcast
+                </button>
+            </div>
+            
+            <div class="flex items-center gap-3 text-xs">
+                <span class="text-gray-400">Operator:</span>
+                <span class="text-white font-medium">Cmd. Johnson</span>
+                <span class="text-gray-400">•</span>
+                <span class="text-gray-400">Session:</span>
+                <span class="text-white font-medium">02:34:18</span>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Floating AI Assistant -->
+    <div class="fixed bottom-20 right-6 z-50">
+        <div class="relative">
+            <button class="w-14 h-14 rounded-full bg-gradient-to-r from-green-400 to-cyan-400 flex items-center justify-center shadow-2xl hover:scale-110 transition-transform">
+                <i class="fas fa-robot text-black text-xl"></i>
+            </button>
+            <div class="absolute bottom-full right-0 mb-2 w-64 smart-panel rounded-xl p-4 hidden">
+                <h4 class="text-sm font-semibold mb-2">AI Assistant</h4>
+                <div class="space-y-2">
+                    <button class="w-full text-left text-xs bg-black/30 rounded p-2 hover:bg-black/50">
+                        "Analyze crowd patterns"
+                    </button>
+                    <button class="w-full text-left text-xs bg-black/30 rounded p-2 hover:bg-black/50">
+                        "Optimize guard positions"
+                    </button>
+                    <button class="w-full text-left text-xs bg-black/30 rounded p-2 hover:bg-black/50">
+                        "Predict next 2 hours"
+                    </button>
+                    <button class="w-full text-left text-xs bg-black/30 rounded p-2 hover:bg-black/50">
+                        "Emergency evacuation plan"
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Simulate real-time updates
+        setInterval(() => {
+            // Update time
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+            document.querySelector('header .text-sm.font-medium').textContent = timeStr;
+            
+            // Random metric updates
+            const metrics = document.querySelectorAll('.adaptive-grid .text-lg');
+            if (Math.random() > 0.7) {
+                const randomMetric = metrics[Math.floor(Math.random() * metrics.length)];
+                const currentValue = parseInt(randomMetric.textContent);
+                const newValue = currentValue + (Math.random() > 0.5 ? 1 : -1);
+                randomMetric.textContent = newValue + (randomMetric.textContent.includes('s') ? 's' : randomMetric.textContent.includes('%') ? '%' : '');
+            }
+        }, 1000);
+        
+        // Voice indicator animation
+        const voiceIndicator = document.querySelector('.voice-indicator');
+        voiceIndicator.addEventListener('click', () => {
+            voiceIndicator.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

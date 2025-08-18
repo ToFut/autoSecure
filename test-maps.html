@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps Test</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="error"></div>
+    
+    <script>
+        function initMap() {
+            console.log('Google Maps loaded successfully');
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 10,
+                center: { lat: 40.7580, lng: -73.9855 }
+            });
+        }
+        
+        window.gm_authFailure = function() {
+            document.getElementById('error').innerHTML = 'Google Maps authentication failed. Check your API key.';
+            console.error('Google Maps authentication failed');
+        };
+    </script>
+    
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASakZnqIz8Z_dLJnGwqi-smNmfe-ymzOU&callback=initMap">
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+{
+  "name": "autosecure-demo",
+  "version": "1.0.0",
+  "description": "Next-Generation AI-Powered Security Event Planning Platform",
+  "private": true,
+  "dependencies": {
+    "@googlemaps/js-api-loader": "^1.16.2",
+    "@reduxjs/toolkit": "^1.9.7",
+    "@types/google.maps": "^3.54.10",
+    "@types/html2canvas": "^0.5.35",
+    "@types/mapbox-gl": "^3.4.1",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.33",
+    "@types/react-dom": "^18.2.14",
+    "autoprefixer": "^10.4.16",
+    "clsx": "^2.0.0",
+    "framer-motion": "^10.16.4",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
+    "mapbox-gl": "^3.14.0",
+    "postcss": "^8.4.31",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1",
+    "react-redux": "^8.1.3",
+    "react-router-dom": "^6.17.0",
+    "react-scripts": "5.0.1",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "start": "PORT=3005 react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
