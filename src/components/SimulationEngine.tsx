@@ -539,147 +539,149 @@ const SimulationEngine: React.FC = () => {
             transition={{ duration: 0.3 }}
             className="px-5 pb-5"
           >
-
-      {/* Scenario Selection */}
-      <div className="mb-4">
-        <label className="text-xs text-gray-400 mb-2 block">Scenario Type</label>
-        <div className="grid grid-cols-2 gap-2">
-          {(['normal', 'evacuation', 'threat', 'vip'] as const).map(type => (
-            <button
-              key={type}
-              onClick={() => runScenario(type)}
-              className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                scenario === type
-                  ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-black'
-                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
-              }`}
-            >
-              {type.charAt(0).toUpperCase() + type.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Prerequisites Check */}
-      {(!mapInstance || !perimeter) && (
-        <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-          <div className="flex items-center gap-2 mb-1">
-            <i className="fas fa-exclamation-triangle text-yellow-400"></i>
-            <span className="text-sm font-medium text-yellow-400">Prerequisites Required</span>
-          </div>
-          <p className="text-xs text-gray-400">
-            {!mapInstance && "Map not loaded. "}{!perimeter && "Create a perimeter first."}
-          </p>
-        </div>
-      )}
-
-      {/* Simulation Controls */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={startSimulation}
-          disabled={isRunning || !mapInstance || !perimeter}
-          className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500 text-green-400 px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        >
-          <i className="fas fa-play mr-2"></i>
-          Start
-        </button>
-        <button
-          onClick={stopSimulation}
-          disabled={!isRunning}
-          className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500 text-red-400 px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        >
-          <i className="fas fa-stop mr-2"></i>
-          Stop
-        </button>
-      </div>
-
-      {/* Speed Control */}
-      <div className="mb-4">
-        <label className="text-xs text-gray-400 mb-2 block">
-          Simulation Speed: {simulationSpeed}x
-        </label>
-        <input
-          type="range"
-          min="0.5"
-          max="5"
-          step="0.5"
-          value={simulationSpeed}
-          onChange={(e) => setSimulationSpeed(parseFloat(e.target.value))}
-          className="w-full"
-        />
-      </div>
-
-      {/* Live Metrics */}
-      <div className="space-y-3">
-        <div className="bg-gray-800/50 rounded-lg p-3">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-gray-400">Crowd Size</span>
-            <span className="text-sm font-bold text-white">{simulationData.crowdSize}</span>
-          </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-gray-400">Crowd Density</span>
-            <span className="text-sm font-bold text-yellow-400">
-              {simulationData.crowdDensity.toFixed(1)} p/100m²
-            </span>
-          </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-gray-400">Flow Rate</span>
-            <span className="text-sm font-bold text-blue-400">
-              {simulationData.flowRate.toFixed(0)}%
-            </span>
-          </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-gray-400">Evacuation Time</span>
-            <span className="text-sm font-bold text-green-400">
-              {simulationData.evacuationTime}s
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-400">Incident Risk</span>
-            <span className={`text-sm font-bold ${
-              simulationData.incidentProbability > 50 ? 'text-red-400' :
-              simulationData.incidentProbability > 25 ? 'text-yellow-400' :
-              'text-green-400'
-            }`}>
-              {simulationData.incidentProbability.toFixed(0)}%
-            </span>
-          </div>
-        </div>
-
-        {/* Bottleneck Warnings */}
-        {simulationData.bottlenecks.length > 0 && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <i className="fas fa-exclamation-triangle text-red-400"></i>
-              <span className="text-sm font-medium text-red-400">
-                {simulationData.bottlenecks.length} Bottlenecks Detected
-              </span>
+            {/* Scenario Selection */}
+            <div className="mb-4">
+              <label className="text-xs text-gray-400 mb-2 block">Scenario Type</label>
+              <div className="grid grid-cols-2 gap-2">
+                {(['normal', 'evacuation', 'threat', 'vip'] as const).map(type => (
+                  <button
+                    key={type}
+                    onClick={() => runScenario(type)}
+                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      scenario === type
+                        ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-black'
+                        : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                    }`}
+                  >
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </button>
+                ))}
+              </div>
             </div>
-            <p className="text-xs text-gray-400">
-              High crowd density areas require immediate attention
-            </p>
-          </div>
-        )}
 
-        {/* Recommendations */}
-        {isRunning && (
-          <div className="bg-primary-500/10 border border-primary-500/30 rounded-lg p-3">
-            <p className="text-xs text-primary-400 font-medium mb-1">AI Recommendations:</p>
-            <ul className="text-xs text-gray-300 space-y-1">
-              {simulationData.incidentProbability > 50 && (
-                <li>• Deploy additional security personnel</li>
+            {/* Prerequisites Check */}
+            {(!mapInstance || !perimeter) && (
+              <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <i className="fas fa-exclamation-triangle text-yellow-400"></i>
+                  <span className="text-sm font-medium text-yellow-400">Prerequisites Required</span>
+                </div>
+                <p className="text-xs text-gray-400">
+                  {!mapInstance && "Map not loaded. "}{!perimeter && "Create a perimeter first."}
+                </p>
+              </div>
+            )}
+
+            {/* Simulation Controls */}
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={startSimulation}
+                disabled={isRunning || !mapInstance || !perimeter}
+                className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500 text-green-400 px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                <i className="fas fa-play mr-2"></i>
+                Start
+              </button>
+              <button
+                onClick={stopSimulation}
+                disabled={!isRunning}
+                className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500 text-red-400 px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                <i className="fas fa-stop mr-2"></i>
+                Stop
+              </button>
+            </div>
+
+            {/* Speed Control */}
+            <div className="mb-4">
+              <label className="text-xs text-gray-400 mb-2 block">
+                Simulation Speed: {simulationSpeed}x
+              </label>
+              <input
+                type="range"
+                min="0.5"
+                max="5"
+                step="0.5"
+                value={simulationSpeed}
+                onChange={(e) => setSimulationSpeed(parseFloat(e.target.value))}
+                className="w-full"
+              />
+            </div>
+
+            {/* Live Metrics */}
+            <div className="space-y-3">
+              <div className="bg-gray-800/50 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-gray-400">Crowd Size</span>
+                  <span className="text-sm font-bold text-white">{simulationData.crowdSize}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-gray-400">Crowd Density</span>
+                  <span className="text-sm font-bold text-yellow-400">
+                    {simulationData.crowdDensity.toFixed(1)} p/100m²
+                  </span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-gray-400">Flow Rate</span>
+                  <span className="text-sm font-bold text-blue-400">
+                    {simulationData.flowRate.toFixed(0)}%
+                  </span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-gray-400">Evacuation Time</span>
+                  <span className="text-sm font-bold text-green-400">
+                    {simulationData.evacuationTime}s
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-400">Incident Risk</span>
+                  <span className={`text-sm font-bold ${
+                    simulationData.incidentProbability > 50 ? 'text-red-400' :
+                    simulationData.incidentProbability > 25 ? 'text-yellow-400' :
+                    'text-green-400'
+                  }`}>
+                    {simulationData.incidentProbability.toFixed(0)}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Bottleneck Warnings */}
+              {simulationData.bottlenecks.length > 0 && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <i className="fas fa-exclamation-triangle text-red-400"></i>
+                    <span className="text-sm font-medium text-red-400">
+                      {simulationData.bottlenecks.length} Bottlenecks Detected
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    High crowd density areas require immediate attention
+                  </p>
+                </div>
               )}
-              {simulationData.bottlenecks.length > 2 && (
-                <li>• Implement crowd flow management</li>
+
+              {/* Recommendations */}
+              {isRunning && (
+                <div className="bg-primary-500/10 border border-primary-500/30 rounded-lg p-3">
+                  <p className="text-xs text-primary-400 font-medium mb-1">AI Recommendations:</p>
+                  <ul className="text-xs text-gray-300 space-y-1">
+                    {simulationData.incidentProbability > 50 && (
+                      <li>• Deploy additional security personnel</li>
+                    )}
+                    {simulationData.bottlenecks.length > 2 && (
+                      <li>• Implement crowd flow management</li>
+                    )}
+                    {simulationData.evacuationTime > 120 && (
+                      <li>• Add emergency exit routes</li>
+                    )}
+                    {simulationData.crowdDensity > 50 && (
+                      <li>• Consider capacity restrictions</li>
+                    )}
+                  </ul>
+                </div>
               )}
-              {simulationData.evacuationTime > 120 && (
-                <li>• Add emergency exit routes</li>
-              )}
-              {simulationData.crowdDensity > 50 && (
-                <li>• Consider capacity restrictions</li>
-              )}
-            </ul>
-          </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </motion.div>
