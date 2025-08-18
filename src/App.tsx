@@ -12,6 +12,7 @@ import ResourcesPanel from './components/ResourcesPanel';
 import EventStatistics from './components/EventStatistics';
 import AISuggestedPlans from './components/AISuggestedPlans';
 import Sidebar from './components/Sidebar';
+import ExportManager from './components/ExportManager';
 import toast from 'react-hot-toast';
 
 const App: React.FC = () => {
@@ -545,6 +546,9 @@ const App: React.FC = () => {
           </div>
         </div>
       </footer>
+      
+      {/* Export Manager */}
+      <ExportManager mapInstance={null} />
       
       {/* Floating AI Assistant */}
       <div className="fixed bottom-20 right-6 z-50">

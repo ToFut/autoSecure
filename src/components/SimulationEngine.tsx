@@ -44,6 +44,7 @@ const SimulationEngine: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const animationRef = useRef<number>();
   const agentsRef = useRef<Agent[]>([]);
+  const isRunningRef = useRef(false);
 
   // Initialize simulation
   const initializeSimulation = () => {
@@ -181,9 +182,14 @@ const SimulationEngine: React.FC = () => {
 
   // Update agent positions
   const updateAgents = () => {
-    const updatedAgents = agentsRef.current.map(agent => {
+    // Only log occasionally to avoid spam
+    if (Math.random() < 0.01) { // 1% chance to log
+      console.log('Updating', agentsRef.current.length, 'agents');
+    }
+    
+    const updatedAgents = agentsRef.current.map((agent, index) => {
       // Calculate movement based on scenario
-      let speed = 0.00001 * simulationSpeed;
+      let speed = 0.0001 * simulationSpeed; // Increased speed 10x
       
       if (scenario === 'evacuation') {
         speed *= 3; // People move faster in evacuation
@@ -198,7 +204,11 @@ const SimulationEngine: React.FC = () => {
       const deltaLng = dest.lng() - pos.lng();
       const distance = Math.sqrt(deltaLat * deltaLat + deltaLng * deltaLng);
 
-      if (distance < 0.0001) {
+      if (index < 3) { // Log first 3 agents for debugging
+        console.log(`Agent ${agent.id}: pos(${pos.lat().toFixed(6)}, ${pos.lng().toFixed(6)}) -> dest(${dest.lat().toFixed(6)}, ${dest.lng().toFixed(6)}) distance: ${distance.toFixed(6)} speed: ${speed}`);
+      }
+
+      if (distance < 0.001) { // Increased threshold
         // Reached destination, set new one
         if (perimeter) {
           const path = perimeter.getPath();
@@ -224,16 +234,22 @@ const SimulationEngine: React.FC = () => {
         }
       }
 
-      // Guards patrol behavior
+      // Guards have different movement pattern but use same destination system
       if (agent.type === 'guard') {
-        // Guards move slower but more deliberately
-        agent.position = new google.maps.LatLng(
-          pos.lat() + (Math.random() - 0.5) * speed * 0.5,
-          pos.lng() + (Math.random() - 0.5) * speed * 0.5
-        );
-        
-        if (agent.marker) {
-          agent.marker.setPosition(agent.position);
+        // Guards move more cautiously - reduce speed
+        const guardSpeed = speed * 0.7;
+        if (distance > 0.001) {
+          const normalizedLat = (deltaLat / distance) * guardSpeed;
+          const normalizedLng = (deltaLng / distance) * guardSpeed;
+          
+          agent.position = new google.maps.LatLng(
+            pos.lat() + normalizedLat,
+            pos.lng() + normalizedLng
+          );
+          
+          if (agent.marker) {
+            agent.marker.setPosition(agent.position);
+          }
         }
       }
 
@@ -241,6 +257,7 @@ const SimulationEngine: React.FC = () => {
     });
 
     agentsRef.current = updatedAgents;
+    setAgents(updatedAgents); // Also update state for re-renders
 
     // Detect bottlenecks
     detectBottlenecks();
@@ -452,16 +469,30 @@ const SimulationEngine: React.FC = () => {
     }
     
     setIsRunning(true);
+    isRunningRef.current = true;
     initializeSimulation();
     
     // Wait a bit for agents to be created before starting animation
     setTimeout(() => {
-      if (!isRunning) return; // Check if still running
+      console.log('Starting animation loop with', agentsRef.current.length, 'agents');
+      console.log('isRunning state:', isRunning);
       
+      let frameCount = 0;
       const animate = () => {
-        if (agentsRef.current.length > 0 && isRunning) {
+        frameCount++;
+        if (frameCount % 60 === 0) { // Log every 60 frames (about once per second)
+          console.log('Animation frame', frameCount, 'isRunning:', isRunning, 'agents:', agentsRef.current.length);
+        }
+        
+        if (agentsRef.current.length > 0) {
           updateAgents();
+        }
+        
+        // Continue animation loop using ref to avoid stale closure
+        if (isRunningRef.current) {
           animationRef.current = requestAnimationFrame(animate);
+        } else {
+          console.log('Animation stopped, isRunningRef.current:', isRunningRef.current);
         }
       };
       
@@ -477,10 +508,13 @@ const SimulationEngine: React.FC = () => {
 
   // Stop simulation
   const stopSimulation = () => {
+    console.log('Stopping simulation');
     setIsRunning(false);
+    isRunningRef.current = false;
     
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
+      animationRef.current = undefined;
     }
     
     // Clear all agent markers
