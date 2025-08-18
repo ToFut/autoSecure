@@ -75,8 +75,10 @@ const SimulationEngine: React.FC = () => {
     const crowdSize = Math.floor(area * 2.5);
     const newAgents: Agent[] = [];
 
-    // Create civilian agents
-    for (let i = 0; i < Math.min(crowdSize, 500); i++) {
+    // Create civilian agents (reduced count for better visibility)
+    const maxAgents = Math.min(crowdSize, 30); // Smaller number for clearer visualization
+    console.log('Creating', maxAgents, 'civilian agents out of calculated', crowdSize);
+    for (let i = 0; i < maxAgents; i++) {
       const agent: Agent = {
         id: `civilian-${i}`,
         position: generateRandomPositionInPolygon(bounds, path),
@@ -91,12 +93,14 @@ const SimulationEngine: React.FC = () => {
         map: mapInstance,
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
-          scale: 3,
+          scale: 8,
           fillColor: '#3b82f6',
-          fillOpacity: 0.6,
-          strokeWeight: 0
+          fillOpacity: 0.9,
+          strokeColor: '#ffffff',
+          strokeWeight: 2
         },
-        clickable: false
+        clickable: false,
+        zIndex: 500
       });
 
       newAgents.push(agent);
@@ -119,12 +123,13 @@ const SimulationEngine: React.FC = () => {
           map: mapInstance,
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
-            scale: 5,
+            scale: 10,
             fillColor: '#10b981',
-            fillOpacity: 0.9,
+            fillOpacity: 1.0,
             strokeColor: '#ffffff',
-            strokeWeight: 1
-          }
+            strokeWeight: 3
+          },
+          zIndex: 600
         });
 
         newAgents.push(agent);
@@ -132,6 +137,12 @@ const SimulationEngine: React.FC = () => {
     }
 
     console.log('Created agents:', newAgents.length);
+    console.log('Sample agent positions:', newAgents.slice(0, 5).map(a => ({
+      id: a.id,
+      type: a.type,
+      position: { lat: a.position.lat(), lng: a.position.lng() },
+      hasMarker: !!a.marker
+    })));
     setAgents(newAgents);
     agentsRef.current = newAgents;
 
@@ -491,7 +502,12 @@ const SimulationEngine: React.FC = () => {
 
   // Debug context values
   useEffect(() => {
-    console.log('SimulationEngine context update:', { mapInstance, perimeter });
+    console.log('SimulationEngine context update:', { 
+      mapInstance: !!mapInstance, 
+      perimeter: !!perimeter,
+      mapInstanceType: mapInstance?.constructor?.name,
+      perimeterType: perimeter?.constructor?.name
+    });
   }, [mapInstance, perimeter]);
 
   // Clean up on unmount

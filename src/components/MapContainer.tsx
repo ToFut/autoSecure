@@ -63,6 +63,229 @@ const MapContainer: React.FC = () => {
     deploymentModeRef.current = deploymentMode;
   }, [deploymentMode]);
 
+  // Sync existing selectedArea with context when it changes
+  useEffect(() => {
+    console.log('selectedArea changed, syncing with context:', selectedArea);
+    setPerimeterPolygon(selectedArea);
+  }, [selectedArea, setPerimeterPolygon]);
+
+  // Helper function to create clustered icons with split visualization
+  const createClusterIcon = (resourceCounts: { [key: string]: number }) => {
+    const resourceTypes = Object.keys(resourceCounts);
+          const totalCount = Object.values(resourceCounts).reduce((a, b) => (a as number) + (b as number), 0);
+    const colors = {
+      'guard': '#00ff88',
+      'camera': '#00d4ff',
+      'sensor': '#8b5cf6',
+      'k9': '#fbbf24',
+      'drone': '#06b6d4',
+      'medical': '#ff3b30',
+      'barrier': '#ff9500'
+    };
+    
+    const emojis = {
+      'guard': '👮',
+      'camera': '📹',
+      'sensor': '📡',
+      'k9': '🐕',
+      'drone': '🚁',
+      'medical': '➕',
+      'barrier': '🚧'
+    };
+    
+    // Calculate slice angles for pie chart effect
+    let currentAngle = 0;
+    const slices = resourceTypes.map(type => {
+      const count = resourceCounts[type];
+      const percentage = count / totalCount;
+      const sliceAngle = percentage * 360;
+      const slice = {
+        type,
+        count,
+        startAngle: currentAngle,
+        endAngle: currentAngle + sliceAngle,
+        color: colors[type as keyof typeof colors] || '#888',
+        emoji: emojis[type as keyof typeof emojis] || '⚪'
+      };
+      currentAngle += sliceAngle;
+      return slice;
+    });
+    
+    // Create SVG with split/pie visualization
+    const svgParts = slices.map(slice => {
+      const startAngleRad = (slice.startAngle - 90) * Math.PI / 180;
+      const endAngleRad = (slice.endAngle - 90) * Math.PI / 180;
+      const largeArcFlag = slice.endAngle - slice.startAngle > 180 ? 1 : 0;
+      
+      const x1 = 32 + 20 * Math.cos(startAngleRad);
+      const y1 = 32 + 20 * Math.sin(startAngleRad);
+      const x2 = 32 + 20 * Math.cos(endAngleRad);
+      const y2 = 32 + 20 * Math.sin(endAngleRad);
+      
+      return `
+        <path d="M 32 32 L ${x1} ${y1} A 20 20 0 ${largeArcFlag} 1 ${x2} ${y2} Z" 
+              fill="${slice.color}" stroke="#fff" stroke-width="2"/>
+      `;
+    }).join('');
+    
+    // Add emoji in center and count badge
+    const svgContent = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+        <defs>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="black" flood-opacity="0.4"/>
+          </filter>
+        </defs>
+        <circle cx="32" cy="32" r="30" fill="#000" stroke="#fff" stroke-width="3" filter="url(#shadow)"/>
+        ${svgParts}
+        <circle cx="32" cy="32" r="12" fill="rgba(0,0,0,0.8)" stroke="#fff" stroke-width="2"/>
+        <text x="32" y="38" font-size="16" text-anchor="middle" fill="#fff" font-weight="bold">${totalCount}</text>
+        <circle cx="50" cy="14" r="10" fill="#ff3b30" stroke="#fff" stroke-width="2"/>
+        <text x="50" y="18" font-size="10" text-anchor="middle" fill="#fff" font-weight="bold">${resourceTypes.length}</text>
+      </svg>
+    `;
+    
+    return {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgContent),
+      scaledSize: new google.maps.Size(54, 54),
+      anchor: new google.maps.Point(27, 27)
+    };
+  };
+
+  // Helper function to create single resource icons
+  const createSingleResourceIcon = (resourceType: string) => {
+    const configs = {
+      'guard': { color: '#00ff88', innerColor: '#00cc66', emoji: '👮', textColor: '#000' },
+      'camera': { color: '#00d4ff', innerColor: '#00aacc', emoji: '📹', textColor: '#000' },
+      'sensor': { color: '#8b5cf6', innerColor: '#6d28d9', emoji: '📡', textColor: '#fff' },
+      'k9': { color: '#fbbf24', innerColor: '#d97706', emoji: '🐕', textColor: '#000' },
+      'drone': { color: '#06b6d4', innerColor: '#0891b2', emoji: '🚁', textColor: '#fff' },
+      'medical': { color: '#ff3b30', innerColor: '#dc2626', emoji: '➕', textColor: '#fff' },
+      'barrier': { color: '#ff9500', innerColor: '#ea580c', emoji: '🚧', textColor: '#000' },
+      'radio': { color: '#10b981', innerColor: '#059669', emoji: '📻', textColor: '#fff' },
+      'barriers': { color: '#ff9500', innerColor: '#ea580c', emoji: '🚧', textColor: '#000' } // plural form
+    };
+    
+    console.log('createSingleResourceIcon called with resourceType:', resourceType);
+    const config = configs[resourceType as keyof typeof configs] || configs.guard;
+    console.log('Using config:', config, 'for resourceType:', resourceType);
+    
+    const svgContent = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+        <defs>
+          <filter id="shadow-${resourceType}" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="black" flood-opacity="0.3"/>
+          </filter>
+        </defs>
+        <circle cx="24" cy="24" r="20" fill="${config.color}" stroke="#fff" stroke-width="3" filter="url(#shadow-${resourceType})"/>
+        <circle cx="24" cy="24" r="16" fill="${config.innerColor}" stroke="#000" stroke-width="1"/>
+        <text x="24" y="32" font-size="20" text-anchor="middle" fill="${config.textColor}">${config.emoji}</text>
+      </svg>
+    `;
+    
+    console.log('Generated SVG for', resourceType, ':', svgContent.substring(0, 100) + '...');
+    
+    return {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgContent),
+      scaledSize: new google.maps.Size(42, 42),
+      anchor: new google.maps.Point(21, 21)
+    };
+  };
+
+  // Helper function for z-index priority
+  const getResourceZIndex = (type: string): number => {
+    const zIndexMap: { [key: string]: number } = {
+      'drone': 1000,    // Highest priority (aerial)
+      'camera': 900,    // High visibility priority
+      'sensor': 800,    // Detection equipment
+      'guard': 700,     // Personnel
+      'medical': 600,   // Support
+      'k9': 500,        // Mobile units
+      'barrier': 400    // Static obstacles (lowest)
+    };
+    return zIndexMap[type] || 500;
+  };
+
+  // Helper function to create resource clusters when spacing fails
+  const createResourceCluster = (newResourceType: string, position: google.maps.LatLng, conflictingResources: any[]) => {
+    console.log('Creating cluster for', newResourceType, 'with', conflictingResources.length, 'existing resources');
+    
+    // Remove existing individual markers
+    conflictingResources.forEach(resource => {
+      if (resource.marker) {
+        resource.marker.setMap(null);
+      }
+    });
+    
+    // Collect all resource types (including the new one)
+    const allResourceTypes = [...conflictingResources.map(r => r.type), newResourceType];
+    const resourceCounts = allResourceTypes.reduce((acc, type) => {
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {} as { [key: string]: number });
+    
+    // Create clustered icon
+    const clusterIcon = createClusterIcon(resourceCounts);
+    
+    // Use the original position for the cluster
+    const clusterMarker = new window.google.maps.Marker({
+      position: position,
+      map: map,
+      title: `Cluster: ${Object.entries(resourceCounts).map(([type, count]) => `${count} ${type}`).join(', ')}`,
+      icon: clusterIcon,
+      animation: window.google.maps.Animation.DROP,
+      draggable: true,
+      zIndex: 1200  // Highest priority for clusters
+    });
+    
+    // Add cluster click listener
+    clusterMarker.addListener('click', () => {
+      const resourceList = Object.entries(resourceCounts)
+        .map(([type, count]) => `${count}x ${type.toUpperCase()}`)
+        .join('<br>');
+      
+      const infoWindow = new window.google.maps.InfoWindow({
+        content: `
+          <div style="color: #000; font-family: sans-serif;">
+            <h3>Resource Cluster</h3>
+            <p><strong>Resources:</strong></p>
+            <p>${resourceList}</p>
+            <p><strong>Total Units:</strong> ${Object.values(resourceCounts).reduce((a, b) => (a as number) + (b as number), 0)}</p>
+            <p>Position: ${position.lat().toFixed(6)}, ${position.lng().toFixed(6)}</p>
+            <p style="color: #666; font-size: 12px;">💡 Drag to reposition entire cluster</p>
+          </div>
+        `
+      });
+      infoWindow.open(map, clusterMarker);
+    });
+    
+    // Remove old individual resources from state
+    setDeployedResources(prev => prev.filter(resource => !conflictingResources.includes(resource)));
+    
+    // Add cluster to state
+    const clusterResource = {
+      id: `cluster-${Date.now()}`,
+      type: 'cluster',
+      resourceTypes: resourceCounts,
+      position: position,
+      marker: clusterMarker
+    };
+    
+    setDeployedResources(prev => [...prev, clusterResource as any]);
+    
+    // Update Redux store
+    dispatch(incrementResourceDeployed(newResourceType));
+    
+    dispatch(addNotification({
+      type: 'success',
+      title: 'Resource Cluster Created',
+              message: `${newResourceType.toUpperCase()} added to cluster with ${Object.values(resourceCounts).reduce((a, b) => (a as number) + (b as number), 0)} total units`
+    }));
+    
+    // Clear deployment mode
+    setDeploymentMode(null);
+  };
+
   const createDemoMap = () => {
     if (!mapRef.current) return;
     
@@ -674,245 +897,137 @@ const MapContainer: React.FC = () => {
       return;
     }
     
-    // Enhanced icons with better visibility and shadow effects
-    const icons: { [key: string]: { url: string; scaledSize: any; anchor: any } } = {
-      guard: { 
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-            <defs>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="black" flood-opacity="0.3"/>
-              </filter>
-            </defs>
-            <circle cx="24" cy="24" r="20" fill="#00ff88" stroke="#fff" stroke-width="3" filter="url(#shadow)"/>
-            <circle cx="24" cy="24" r="16" fill="#00cc66" stroke="#000" stroke-width="1"/>
-            <text x="24" y="32" font-size="20" text-anchor="middle" fill="#000">👮</text>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(42, 42),
-        anchor: new google.maps.Point(21, 21)
-      },
-      camera: { 
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-            <defs>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="black" flood-opacity="0.3"/>
-              </filter>
-            </defs>
-            <circle cx="24" cy="24" r="20" fill="#00d4ff" stroke="#fff" stroke-width="3" filter="url(#shadow)"/>
-            <circle cx="24" cy="24" r="16" fill="#00aacc" stroke="#000" stroke-width="1"/>
-            <text x="24" y="32" font-size="20" text-anchor="middle" fill="#000">📹</text>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(42, 42),
-        anchor: new google.maps.Point(21, 21)
-      },
-      sensor: { 
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-            <defs>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="black" flood-opacity="0.3"/>
-              </filter>
-            </defs>
-            <circle cx="24" cy="24" r="20" fill="#8b5cf6" stroke="#fff" stroke-width="3" filter="url(#shadow)"/>
-            <circle cx="24" cy="24" r="16" fill="#6d28d9" stroke="#000" stroke-width="1"/>
-            <text x="24" y="32" font-size="20" text-anchor="middle" fill="#fff">📡</text>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(42, 42),
-        anchor: new google.maps.Point(21, 21)
-      },
-      k9: { 
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-            <defs>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="black" flood-opacity="0.3"/>
-              </filter>
-            </defs>
-            <circle cx="24" cy="24" r="20" fill="#fbbf24" stroke="#fff" stroke-width="3" filter="url(#shadow)"/>
-            <circle cx="24" cy="24" r="16" fill="#d97706" stroke="#000" stroke-width="1"/>
-            <text x="24" y="32" font-size="20" text-anchor="middle" fill="#000">🐕</text>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(42, 42),
-        anchor: new google.maps.Point(21, 21)
-      },
-      drone: { 
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-            <defs>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="black" flood-opacity="0.3"/>
-              </filter>
-            </defs>
-            <circle cx="24" cy="24" r="20" fill="#06b6d4" stroke="#fff" stroke-width="3" filter="url(#shadow)"/>
-            <circle cx="24" cy="24" r="16" fill="#0891b2" stroke="#000" stroke-width="1"/>
-            <text x="24" y="32" font-size="20" text-anchor="middle" fill="#fff">🚁</text>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(42, 42),
-        anchor: new google.maps.Point(21, 21)
-      },
-      medical: { 
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-            <defs>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="black" flood-opacity="0.3"/>
-              </filter>
-            </defs>
-            <circle cx="24" cy="24" r="20" fill="#ff3b30" stroke="#fff" stroke-width="3" filter="url(#shadow)"/>
-            <circle cx="24" cy="24" r="16" fill="#dc2626" stroke="#000" stroke-width="1"/>
-            <text x="24" y="32" font-size="20" text-anchor="middle" fill="#fff">➕</text>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(42, 42),
-        anchor: new google.maps.Point(21, 21)
-      },
-      barrier: { 
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-            <defs>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="black" flood-opacity="0.3"/>
-              </filter>
-            </defs>
-            <rect x="4" y="4" width="40" height="40" rx="8" fill="#ff9500" stroke="#fff" stroke-width="3" filter="url(#shadow)"/>
-            <rect x="8" y="8" width="32" height="32" rx="6" fill="#ea580c" stroke="#000" stroke-width="1"/>
-            <text x="24" y="32" font-size="20" text-anchor="middle" fill="#000">🚧</text>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(42, 42),
-        anchor: new google.maps.Point(21, 21)
+    // Find a clear position that doesn't overlap with existing resources
+    const MINIMUM_SPACING = 25; // Increased minimum spacing to 25 meters
+    let finalPosition = position;
+    let attempts = 0;
+    const maxAttempts = 20;
+    
+    // Check for existing resources at the exact position first
+    const exactConflicts = deployedResources.filter(resource => {
+      const distance = google.maps.geometry.spherical.computeDistanceBetween(position, resource.position);
+      return distance < MINIMUM_SPACING;
+    });
+    
+    // If there are conflicts, find a better position
+    if (exactConflicts.length > 0) {
+      console.log(`Found ${exactConflicts.length} conflicting resources, finding alternative position...`);
+      
+      // Try spiral placement around the original position
+      while (attempts < maxAttempts) {
+        const spiralRadius = 30 + (attempts * 15); // Start at 30m and increase
+        const spiralAngle = attempts * 137.5; // Golden angle for even distribution
+        
+        const spiralPosition = google.maps.geometry.spherical.computeOffset(
+          position,
+          spiralRadius,
+          spiralAngle
+        );
+        
+        // Check if this position has conflicts
+        const hasConflicts = deployedResources.some(resource => {
+          const distance = google.maps.geometry.spherical.computeDistanceBetween(spiralPosition, resource.position);
+          return distance < MINIMUM_SPACING;
+        });
+        
+        if (!hasConflicts) {
+          finalPosition = spiralPosition;
+          console.log(`Found clear position after ${attempts + 1} attempts at ${spiralRadius}m distance`);
+          break;
+        }
+        
+        attempts++;
       }
+      
+      // If we still can't find a clear position, create a cluster
+      if (attempts >= maxAttempts) {
+        console.log('Could not find clear position, creating cluster instead');
+        return createResourceCluster(resourceType, position, exactConflicts);
+      }
+    }
+    
+    // Create individual resource marker at the final position
+    const resourceIcon = createSingleResourceIcon(resourceType);
+    
+    const marker = new window.google.maps.Marker({
+      position: finalPosition,
+      map: map,
+      title: `${resourceType.toUpperCase()} Unit`,
+      icon: resourceIcon,
+      animation: window.google.maps.Animation.DROP,
+      draggable: true,
+      zIndex: getResourceZIndex(resourceType)
+    });
+    
+    // Add click listener
+    marker.addListener('click', () => {
+      const infoWindow = new window.google.maps.InfoWindow({
+        content: `
+          <div style="color: #000; font-family: sans-serif;">
+            <h3>${resourceType.toUpperCase()} Unit</h3>
+            <p>Status: Active</p>
+            <p>Position: ${finalPosition.lat().toFixed(6)}, ${finalPosition.lng().toFixed(6)}</p>
+            <p style="color: #666; font-size: 12px;">💡 Drag to reposition</p>
+          </div>
+        `
+      });
+      infoWindow.open(map, marker);
+    });
+    
+    // Add drag listener for repositioning
+    marker.addListener('dragend', () => {
+      const newPosition = marker.getPosition();
+      if (newPosition) {
+        // Check for conflicts at new position
+        const hasNewConflicts = deployedResources.some(resource => {
+          if (resource.marker === marker) return false; // Skip self
+          const distance = google.maps.geometry.spherical.computeDistanceBetween(newPosition, resource.position);
+          return distance < MINIMUM_SPACING;
+        });
+        
+        if (hasNewConflicts) {
+          marker.setPosition(finalPosition); // Revert to original position
+          dispatch(addNotification({
+            type: 'warning',
+            title: 'Positioning Conflict',
+            message: `Resources must be at least ${MINIMUM_SPACING} meters apart`
+          }));
+        } else {
+          // Update position in state
+          setDeployedResources(prev => 
+            prev.map(resource => 
+              resource.marker === marker 
+                ? { ...resource, position: newPosition }
+                : resource
+            )
+          );
+        }
+      }
+    });
+    
+    // Store individual resource
+    const newResource = {
+      id: `${resourceType}-${Date.now()}`,
+      type: resourceType,
+      position: finalPosition,
+      marker: marker
     };
     
-    const resourceIcon = icons[resourceType] || icons.guard;
-    console.log('Using icon for:', resourceType);
+    setDeployedResources(prev => [...prev, newResource]);
     
-    try {
-      // Get z-index based on resource type priority
-      const getResourceZIndex = (type: string): number => {
-        const zIndexMap: { [key: string]: number } = {
-          'drone': 1000,    // Highest priority (aerial)
-          'camera': 900,    // High visibility priority
-          'sensor': 800,    // Detection equipment
-          'guard': 700,     // Personnel
-          'medical': 600,   // Support
-          'k9': 500,        // Mobile units
-          'barrier': 400    // Static obstacles (lowest)
-        };
-        return zIndexMap[type] || 500;
-      };
-      
-      // Create marker with custom icon, draggable, and proper z-index
-      const marker = new window.google.maps.Marker({
-        position: position,
-        map: map,
-        title: `${resourceType.toUpperCase()} Unit`,
-        icon: resourceIcon,
-        animation: window.google.maps.Animation.DROP,
-        draggable: true,
-        zIndex: getResourceZIndex(resourceType)
-      });
-      
-      console.log('Marker created successfully:', marker);
-      
-      // Add click listener for resource details
-      marker.addListener('click', () => {
-        const infoWindow = new window.google.maps.InfoWindow({
-          content: `
-            <div style="color: #000; font-family: sans-serif;">
-              <h3>${resourceType.toUpperCase()} Unit</h3>
-              <p>Status: Active</p>
-              <p>Position: ${position.lat().toFixed(6)}, ${position.lng().toFixed(6)}</p>
-              <p style="color: #666; font-size: 12px;">💡 Drag to reposition</p>
-              <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                      style="background: #ff3b30; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
-                Remove
-              </button>
-            </div>
-          `
-        });
-        infoWindow.open(map, marker);
-      });
-      
-      // Add drag listener to prevent overlaps
-      marker.addListener('dragend', () => {
-        const newPosition = marker.getPosition();
-        if (newPosition) {
-          // Check for overlaps with other resources
-          let hasOverlap = false;
-          deployedResources.forEach(resource => {
-            if (resource.marker !== marker) {
-              const otherPos = resource.marker.getPosition();
-              if (otherPos) {
-                const distance = google.maps.geometry.spherical.computeDistanceBetween(
-                  newPosition, otherPos
-                );
-                // If within 20 meters, it's too close
-                if (distance < 20) {
-                  hasOverlap = true;
-                }
-              }
-            }
-          });
-          
-          if (hasOverlap) {
-            // Revert to previous position
-            marker.setPosition(position);
-            dispatch(addNotification({
-              type: 'warning',
-              title: 'Deployment Conflict',
-              message: 'Resources must be at least 20 meters apart'
-            }));
-          } else {
-            // Update position in our state
-            setDeployedResources(prev => 
-              prev.map(resource => 
-                resource.marker === marker 
-                  ? { ...resource, position: newPosition }
-                  : resource
-              )
-            );
-            dispatch(addNotification({
-              type: 'success',
-              title: 'Resource Repositioned',
-              message: `${resourceType.toUpperCase()} moved to new position`
-            }));
-          }
-        }
-      });
-      
-      // Store deployed resource
-      const newResource = {
-        id: `${resourceType}-${Date.now()}`,
-        type: resourceType,
-        position: position,
-        marker: marker
-      };
-      
-      setDeployedResources(prev => [...prev, newResource]);
-      
-      // Update Redux store - increment deployed count
-      dispatch(incrementResourceDeployed(resourceType));
-      
-      
-      dispatch(addNotification({
-        type: 'success',
-        title: 'Resource Deployed',
-        message: `${resourceType.toUpperCase()} unit deployed successfully`
-      }));
-      
-      // Clear deployment mode
-      setDeploymentMode(null);
-      
-    } catch (error) {
-      console.error('Error creating marker:', error);
-    }
+    // Update Redux store - increment deployed count
+    dispatch(incrementResourceDeployed(resourceType));
+    
+    dispatch(addNotification({
+      type: 'success',
+      title: 'Resource Deployed',
+      message: attempts > 0 
+        ? `${resourceType.toUpperCase()} deployed at optimized position (${30 + (attempts * 15)}m from target)`
+        : `${resourceType.toUpperCase()} deployed successfully`
+    }));
+    
+    // Clear deployment mode
+    setDeploymentMode(null);
   };
   
   const handlePerimeterPinPlacement = (position: google.maps.LatLng) => {

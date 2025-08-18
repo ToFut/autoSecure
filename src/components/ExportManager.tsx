@@ -14,7 +14,7 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
   const dispatch = useDispatch();
   const { currentPlan } = useSelector((state: RootState) => state.security);
   const [isExporting, setIsExporting] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'pdf' | 'json' | 'csv' | 'docx'>('pdf');
+  const [exportFormat, setExportFormat] = useState<'pdf' | 'israeli_police' | 'json' | 'csv' | 'docx'>('pdf');
 
   // Generate comprehensive security report
   const generateReport = () => {
@@ -276,6 +276,161 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
     ];
   };
 
+  // Generate Israeli Police-style Operation Order (פקודת מבצע)
+  const generateIsraeliPoliceOperationOrder = () => {
+    if (!currentPlan) return null;
+
+    const operationOrder = {
+      header: {
+        title: 'פקודת מבצע - פקודת אבטחה',
+        operationName: currentPlan.name || 'מבצע אבטחה',
+        operationNumber: `OP-${Date.now()}`,
+        date: new Date().toLocaleDateString('he-IL'),
+        time: new Date().toLocaleTimeString('he-IL'),
+        classification: 'סודי',
+        unit: 'יחידת האבטחה',
+        commander: 'מפקד המבצע'
+      },
+      situation: {
+        enemy: {
+          threats: currentPlan.risks.filter(r => r.level === 'high').map(risk => ({
+            type: risk.category,
+            description: risk.description,
+            location: `${risk.location.lat.toFixed(6)}, ${risk.location.lng.toFixed(6)}`,
+            probability: 'גבוה'
+          })),
+          capabilities: [
+            'יכולת חדירה למוקד',
+            'שימוש בנשק קל',
+            'פעילות חבלנית',
+            'התקפות רשת'
+          ]
+        },
+        friendly: {
+          forces: {
+            guards: currentPlan.resources.filter(r => r.type === 'guard').reduce((sum, r) => sum + r.count, 0),
+            k9: currentPlan.resources.filter(r => r.type === 'k9').reduce((sum, r) => sum + r.count, 0),
+            medical: currentPlan.resources.filter(r => r.type === 'medical').reduce((sum, r) => sum + r.count, 0),
+            total: currentPlan.resources.reduce((sum, r) => sum + r.count, 0)
+          },
+          equipment: {
+            cameras: currentPlan.resources.filter(r => r.type === 'camera').reduce((sum, r) => sum + r.count, 0),
+            sensors: currentPlan.resources.filter(r => r.type === 'sensor').reduce((sum, r) => sum + r.count, 0),
+            barriers: currentPlan.resources.filter(r => r.type === 'barrier').reduce((sum, r) => sum + r.count, 0)
+          }
+        },
+        terrain: {
+          area: `${Math.round(currentPlan.area).toLocaleString()} מ"ר`,
+          perimeter: `${calculatePerimeterLength()} מטר`,
+          entryPoints: identifyEntryPoints().length,
+          vulnerableAreas: identifyVulnerableSections().length
+        }
+      },
+      mission: {
+        primary: 'אבטחת המוקד ומניעת חדירת גורמים עוינים',
+        secondary: 'הגנה על חיי אדם ורכוש',
+        constraints: [
+          'שמירה על זכויות אזרח',
+          'איסור שימוש בכוח מופרז',
+          'ציות לחוקי המדינה'
+        ]
+      },
+      execution: {
+        concept: {
+          phase1: 'הקמת מערך האבטחה והכנת המוקד',
+          phase2: 'הפעלת מערכות האבטחה והתחלת סיורים',
+          phase3: 'ניהול אירועים ותגובה לאיומים',
+          phase4: 'סיום המבצע ופינוי הכוחות'
+        },
+        tasks: {
+          alpha: {
+            commander: 'מפקד צוות אלפא',
+            mission: 'אבטחת הכניסה הראשית',
+            resources: '4 שוטרים, 2 כלבי שמירה',
+            location: 'שער ראשי'
+          },
+          bravo: {
+            commander: 'מפקד צוות בראבו',
+            mission: 'סיור היקפי ופיקוח על הגדר',
+            resources: '6 שוטרים, 1 כלב שמירה',
+            location: 'היקף המוקד'
+          },
+          charlie: {
+            commander: 'מפקד צוות צארלי',
+            mission: 'אבטחת פנים המוקד',
+            resources: '8 שוטרים, 2 כלבי שמירה',
+            location: 'אזורים פנימיים'
+          },
+          delta: {
+            commander: 'מפקד צוות דלתא',
+            mission: 'תגובה מהירה וטיפול באירועים',
+            resources: '4 שוטרים, 1 צוות רפואי',
+            location: 'מרכז התגובה'
+          }
+        },
+        coordination: {
+          signals: {
+            primary: 'ערוץ רדיו 1 - תקשורת ראשית',
+            secondary: 'ערוץ רדיו 2 - תקשורת משנית',
+            emergency: 'ערוץ רדיו 3 - מצבי חירום',
+            codes: {
+              'קוד אדום': 'אירוע אבטחה חמור',
+              'קוד צהוב': 'חשד לפעילות חשודה',
+              'קוד כחול': 'אירוע רפואי',
+              'קוד שחור': 'אירוע חבלני'
+            }
+          },
+          timing: {
+            start: '06:00',
+            end: '22:00',
+            shiftChange: '10:00, 18:00',
+            briefing: '05:30, 09:30, 17:30'
+          }
+        }
+      },
+      service: {
+        logistics: {
+          supplies: [
+            'ציוד אבטחה אישי',
+            'מכשירי קשר',
+            'תחמושת',
+            'ציוד רפואי',
+            'מזון ומים'
+          ],
+          transportation: [
+            'רכבי סיור',
+            'רכב פיקוד',
+            'רכב רפואי',
+            'רכב תגובה מהירה'
+          ]
+        },
+        medical: {
+          teams: currentPlan.resources.filter(r => r.type === 'medical').reduce((sum, r) => sum + r.count, 0),
+          location: 'מרכז רפואי במוקד',
+          evacuation: 'בית חולים קרוב - 10 דקות'
+        }
+      },
+      command: {
+        chain: {
+          commander: 'מפקד המבצע',
+          deputy: 'סגן מפקד המבצע',
+          alpha: 'מפקד צוות אלפא',
+          bravo: 'מפקד צוות בראבו',
+          charlie: 'מפקד צוות צארלי',
+          delta: 'מפקד צוות דלתא'
+        },
+        location: 'מרכז הפיקוד - בניין ראשי',
+        communications: {
+          primary: '+972-XX-XXX-XXXX',
+          secondary: '+972-XX-XXX-XXXX',
+          emergency: '100'
+        }
+      }
+    };
+
+    return operationOrder;
+  };
+
   // Export as PDF
   const exportAsPDF = async () => {
     setIsExporting(true);
@@ -450,11 +605,185 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
     }));
   };
 
+  // Export Israeli Police Operation Order as PDF
+  const exportIsraeliPolicePDF = async () => {
+    setIsExporting(true);
+    
+    try {
+      const opOrder = generateIsraeliPoliceOperationOrder();
+      if (!opOrder) {
+        dispatch(addNotification({
+          type: 'error',
+          title: 'Export Failed',
+          message: 'No operation order data available'
+        }));
+        return;
+      }
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageHeight = pdf.internal.pageSize.height;
+      const pageWidth = pdf.internal.pageSize.width;
+      let yPosition = 20;
+
+      // Add Hebrew font support (basic implementation)
+      pdf.setFont('helvetica');
+
+      // Header with Hebrew title
+      pdf.setFontSize(20);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('פקודת מבצע - פקודת אבטחה', pageWidth/2, yPosition, { align: 'center' });
+      
+      yPosition += 10;
+      pdf.setFontSize(14);
+      pdf.text(`Operation Order - Security Operation`, pageWidth/2, yPosition, { align: 'center' });
+      
+      yPosition += 15;
+      pdf.setFontSize(12);
+      pdf.text(`Operation: ${opOrder.header.operationName}`, 20, yPosition);
+      pdf.text(`Date: ${opOrder.header.date}`, pageWidth - 60, yPosition);
+      
+      yPosition += 8;
+      pdf.text(`Operation Number: ${opOrder.header.operationNumber}`, 20, yPosition);
+      pdf.text(`Time: ${opOrder.header.time}`, pageWidth - 60, yPosition);
+
+      // Situation Section
+      yPosition += 15;
+      pdf.setFontSize(16);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('1. SITUATION (מצב)', 20, yPosition);
+      
+      yPosition += 10;
+      pdf.setFontSize(12);
+      pdf.text('1.1 Enemy Forces (כוחות האויב):', 25, yPosition);
+      
+      yPosition += 8;
+      pdf.setFontSize(10);
+      opOrder.situation.enemy.threats.forEach((threat, index) => {
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.text(`${index + 1}. ${threat.type}: ${threat.description}`, 30, yPosition);
+        yPosition += 6;
+      });
+
+      // Mission Section
+      yPosition += 10;
+      pdf.setFontSize(16);
+      pdf.text('2. MISSION (משימה)', 20, yPosition);
+      
+      yPosition += 10;
+      pdf.setFontSize(12);
+      pdf.text(`Primary Mission: ${opOrder.mission.primary}`, 25, yPosition);
+      
+      yPosition += 8;
+      pdf.text(`Secondary Mission: ${opOrder.mission.secondary}`, 25, yPosition);
+
+      // Execution Section
+      yPosition += 15;
+      pdf.setFontSize(16);
+      pdf.text('3. EXECUTION (ביצוע)', 20, yPosition);
+      
+      yPosition += 10;
+      pdf.setFontSize(12);
+      pdf.text('3.1 Concept of Operations:', 25, yPosition);
+      
+      yPosition += 8;
+      pdf.setFontSize(10);
+      Object.entries(opOrder.execution.concept).forEach(([phase, description]) => {
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.text(`${phase}: ${description}`, 30, yPosition);
+        yPosition += 6;
+      });
+
+      // Tasks Section
+      yPosition += 10;
+      pdf.setFontSize(12);
+      pdf.text('3.2 Tasks to Subordinate Units:', 25, yPosition);
+      
+      yPosition += 8;
+      Object.entries(opOrder.execution.tasks).forEach(([team, task]) => {
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.setFontSize(10);
+        pdf.text(`${team.toUpperCase()} Team:`, 30, yPosition);
+        yPosition += 6;
+        pdf.text(`  Commander: ${task.commander}`, 35, yPosition);
+        yPosition += 6;
+        pdf.text(`  Mission: ${task.mission}`, 35, yPosition);
+        yPosition += 6;
+        pdf.text(`  Resources: ${task.resources}`, 35, yPosition);
+        yPosition += 6;
+        pdf.text(`  Location: ${task.location}`, 35, yPosition);
+        yPosition += 8;
+      });
+
+      // Command Section
+      yPosition += 10;
+      pdf.setFontSize(16);
+      pdf.text('4. COMMAND (פיקוד)', 20, yPosition);
+      
+      yPosition += 10;
+      pdf.setFontSize(12);
+      pdf.text('4.1 Chain of Command:', 25, yPosition);
+      
+      yPosition += 8;
+      pdf.setFontSize(10);
+      Object.entries(opOrder.command.chain).forEach(([position, name]) => {
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.text(`${position}: ${name}`, 30, yPosition);
+        yPosition += 6;
+      });
+
+      // Communications
+      yPosition += 10;
+      pdf.setFontSize(12);
+      pdf.text('4.2 Communications:', 25, yPosition);
+      
+      yPosition += 8;
+      pdf.setFontSize(10);
+      pdf.text(`Primary: ${opOrder.command.communications.primary}`, 30, yPosition);
+      yPosition += 6;
+      pdf.text(`Emergency: ${opOrder.command.communications.emergency}`, 30, yPosition);
+
+      // Save the PDF
+      const fileName = `Operation_Order_${opOrder.header.operationNumber}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+
+      dispatch(addNotification({
+        type: 'success',
+        title: 'Operation Order Exported',
+        message: `Israeli Police-style Operation Order saved as ${fileName}`
+      }));
+
+    } catch (error) {
+      console.error('PDF export error:', error);
+      dispatch(addNotification({
+        type: 'error',
+        title: 'Export Failed',
+        message: 'Failed to generate Operation Order PDF'
+      }));
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // Handle export based on format
   const handleExport = () => {
     switch (exportFormat) {
       case 'pdf':
         exportAsPDF();
+        break;
+      case 'israeli_police':
+        exportIsraeliPolicePDF();
         break;
       case 'json':
         exportAsJSON();
@@ -484,6 +813,7 @@ const ExportManager: React.FC<ExportManagerProps> = ({ mapInstance }) => {
           className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-primary-500 focus:outline-none"
         >
           <option value="pdf">PDF Report</option>
+          <option value="israeli_police">🇮🇱 Israeli Police Operation Order</option>
           <option value="json">JSON Data</option>
           <option value="csv">CSV Export</option>
         </select>
